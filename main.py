@@ -1,13 +1,13 @@
 import sys
 from game_state import GameState
-from filesystem import FileSystem
+from network import Network
 from cli import CLI
 from narrative import display_boot_sequence
 
 def main():
-    file_system = FileSystem()
-    game_state = GameState()
-    cli = CLI(game_state, file_system)
+    network = Network()
+    game_state = GameState(network)
+    cli = CLI(game_state)
 
     display_boot_sequence()
     cli.start_loop()

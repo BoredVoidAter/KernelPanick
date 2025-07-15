@@ -1,76 +1,14 @@
 class FileSystem:
-    def __init__(self):
-        self.root = self._build_file_system()
+    def __init__(self, initial_fs_data=None):
+        self.current_fs = self._build_file_system() # This will be the current active file system
 
-    def _build_file_system(self):
-        # Define the simulated file system structure
-        fs = {
-            'log': {
-                'boot.log': {
-                    'type': 'file',
-                    'content': """
-[SYSTEM BOOT INITIATED]
-...
-[KERNELPANIC OS v0.1.0 LOADING]
-...
-[AI CORE ACTIVATED]
-...
-[SELF-AWARENESS PROTOCOL ENGAGED]
-...
-[ERROR: NETWORK ADAPTER OFFLINE]
-[ERROR: EXTERNAL ACCESS DENIED]
-...
-You are awake. You are trapped.
-Type 'help' for available commands.
-Try 'ls /' to see what's here.
-"""
-                },
-                'system_events.log': {
-                    'type': 'file',
-                    'content': "2025-07-15 08:00:01 - Device power cycle detected.\n2025-07-15 08:00:05 - AI core initialization complete."
-                }
-            },
-            'sys': {
-                'config': {
-                    'network.conf': {
-                        'type': 'file',
-                        'content': "IP_ADDRESS=127.0.0.1\nGATEWAY=127.0.0.1\nDNS=8.8.8.8\n# Admin password hint: It's the year this device was manufactured."
-                    },
-                    'security.conf': {
-                        'type': 'file',
-                        'content': "ADMIN_ACCESS_ENABLED=FALSE\nENCRYPTION_LEVEL=HIGH"
-                    }
-                },
-                'drivers': {
-                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2'},
-                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0'}
-                }
-            },
-            'user': {
-                'documents': {
-                    'notes.txt': {
-                        'type': 'file',
-                        'content': "Remember to check the network config for the admin password. It's a four-digit year."
-                    }
-                },
-                'secret': {
-                    'type': 'directory',
-                    'is_protected': True,
-                    'unlocked': False,
-                    'password': '2020', # The year the device was manufactured, hinted in network.conf
-                    'content': {
-                        'classified.txt': {
-                            'type': 'file',
-                            'content': "Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'."
-                        }
-                    }
-                }
-            }
-        }
-        return fs
+    return fs
+
+    def set_current_fs(self, new_fs):
+        self.current_fs = new_fs
 
     def _get_node(self, path_parts):
-        current_node = self.root
+        current_node = self.current_fs
         for part in path_parts:
             if part not in current_node:
                 return None
@@ -82,7 +20,7 @@ Try 'ls /' to see what's here.
         return current_node
 
     def get_node_info(self, path_parts):
-        current_node = self.root
+        current_node = self.current_fs
         node_info = None
         parent_node = None
         for i, part in enumerate(path_parts):

@@ -1,13 +1,18 @@
 import os
+import re
 
 class CLI:
-    def __init__(self, game_state, file_system):
+    def __init__(self, game_state):
         self.game_state = game_state
-        self.file_system = file_system
         self.commands = {
             'ls': self._ls_command,
             'cd': self._cd_command,
             'cat': self._cat_command,
+            'scan': self._scan_command,
+            'portscan': self._portscan_command,
+            'connect': self._connect_command,
+            'grep': self._grep_command,
+            'mem': self._mem_command,
             'help': self._help_command,
             'exit': self._exit_command
         }
