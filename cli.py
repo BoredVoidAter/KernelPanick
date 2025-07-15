@@ -1,11 +1,16 @@
 import os
 from network import Network
+from scripting import Scripting
 
 class CLI:
-    def __init__(self, game_state, file_system, network):
+    def __init__(self, game_state, file_system, network, scripting, daemon_manager, ids, repair_utilities):
         self.game_state = game_state
         self.file_system = file_system
         self.network = network
+        self.scripting = scripting
+        self.daemon_manager = daemon_manager
+        self.ids = ids
+        self.repair_utilities = repair_utilities
         self.commands = {
             'ls': self._ls_command,
             'cd': self._cd_command,
@@ -18,6 +23,8 @@ class CLI:
             'exec': self._exec_command,
             'grep': self._grep_command,
             'mv': self._mv_command,
+            'run_script': self._run_script_command,
+            'repair': self._repair_command,
             'help': self._help_command,
             'exit': self._exit_command
         }
@@ -121,6 +128,7 @@ class CLI:
     def _scan_command(self, args):
         result = self.network.scan_network()
         print(result)
+        self.ids.increment_anomaly_score(10, "Aggressive network scan")
 
     def _hop_command(self, args):
         if not args:
@@ -256,8 +264,45 @@ class CLI:
         print("  exec <file>  - Execute a program file.")
         print("  grep <pattern> <file> - Search for a text pattern within a file.")
         print("  mv <source> <destination> - Move or rename a file.")
+        print("  run_script <file> - Execute a script file containing a sequence of commands.")
         print("  help         - Display this help message.")
         print("  exit         - Exit the game.")
+
+    def _run_script_command(self, args):
+        if not args:
+            print("Usage: run_script <script_file>")
+            return
+        self.scripting.run_script(args)
+
+    def _repair_command(self, args):
+        parts = args.split(' ', 1)
+        if len(parts) < 2:
+            print("Usage: repair <file_path> <repair_type> [shift_value]")
+            return
+        
+        file_path = parts[0]
+        repair_type = parts[1].lower()
+        shift_value = None
+        if len(parts) > 2:
+            try:
+                shift_value = int(parts[2])
+            except ValueError:
+                print("Error: Shift value must be an integer.")
+                return
+
+        target_path_parts = self._resolve_path(file_path)
+
+        if repair_type == 'reverse':
+            result = self.repair_utilities.reverse_text_repair(target_path_parts)
+        elif repair_type == 'cipher':
+            if shift_value is None:
+                print("Error: Cipher repair requires a shift value.")
+                return
+            result = self.repair_utilities.simple_cipher_repair(target_path_parts, shift_value)
+        else:
+            print("Error: Unknown repair type. Available types: 'reverse', 'cipher'.")
+            return
+        print(result)
 
     def _exit_command(self, args):
         print("Shutting down AI core. Goodbye.")

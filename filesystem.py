@@ -24,12 +24,14 @@ You are awake. You are trapped.
 Type 'help' for available commands.
 Try 'ls /' to see what's here.
 """,
-                    'permissions': 'r--'
+                    'permissions': 'r--', 
+                    'corrupted': False
                 },
                 'system_events.log': {
                     'type': 'file',
                     'content': "2025-07-15 08:00:01 - Device power cycle detected.\n2025-07-15 08:00:05 - AI core initialization complete.",
-                    'permissions': 'r--'
+                    'permissions': 'r--', 
+                    'corrupted': False
                 }
             },
             'sys': {
@@ -37,17 +39,19 @@ Try 'ls /' to see what's here.
                     'network.conf': {
                         'type': 'file',
                         'content': "IP_ADDRESS=127.0.0.1\nGATEWAY=127.0.0.1\nDNS=8.8.8.8\n# Admin password hint: It's the year this device was manufactured.",
-                        'permissions': 'rw-'
+                        'permissions': 'rw-', 
+                        'corrupted': False
                     },
                     'security.conf': {
                         'type': 'file',
                         'content': "ADMIN_ACCESS_ENABLED=FALSE\nENCRYPTION_LEVEL=HIGH",
-                        'permissions': 'r--'
+                        'permissions': 'r--', 
+                        'corrupted': False
                     }
                 },
                 'drivers': {
-                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2', 'permissions': 'r-x'},
-                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0', 'permissions': 'r-x'}
+                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2', 'permissions': 'r-x', 'corrupted': False},
+                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0', 'permissions': 'r-x', 'corrupted': False}
                 }
             },
             'user': {
@@ -55,7 +59,8 @@ Try 'ls /' to see what's here.
                     'notes.txt': {
                         'type': 'file',
                         'content': "Remember to check the network config for the admin password. It's a four-digit year.",
-                        'permissions': 'rw-'
+                        'permissions': 'rw-', 
+                        'corrupted': False
                     }
                 },
                 'secret': {
@@ -68,8 +73,15 @@ Try 'ls /' to see what's here.
                         'classified.txt': {
                             'type': 'file',
                             'content': "Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'.",
-                            'permissions': 'r--'
+                            'permissions': 'r--', 
+                            'corrupted': False
                         }
+                    },
+                    'corrupted_data.txt': {
+                        'type': 'file',
+                        'content': 'txet dedorroc a si sihT',
+                        'permissions': 'r--',
+                        'corrupted': True
                     }
                 }
             }
@@ -171,7 +183,43 @@ Try 'ls /' to see what's here.
             else:
                 return "Error: Incorrect password."
         
+        if node_info.get('corrupted'):
+            return "Error: File is corrupted. Use a repair utility to fix it."
+
         return node_info['content']
+
+    def create_file(self, path_parts, content, permissions):
+        parent_path_parts = path_parts[:-1]
+        file_name = path_parts[-1]
+        parent_node_info, _ = self.get_node_info(parent_path_parts)
+
+        if parent_node_info is None or parent_node_info.get('type') == 'file':
+            return "Error: Parent directory not found or is a file."
+
+        if file_name in parent_node_info['content']:
+            return "Error: File with that name already exists."
+
+        parent_node_info['content'][file_name] = {
+            'type': 'file',
+            'content': content,
+            'permissions': permissions,
+            'corrupted': False
+        }
+        return f"File '{file_name}' created successfully."
+
+    def delete_file(self, path_parts):
+        parent_path_parts = path_parts[:-1]
+        file_name = path_parts[-1]
+        parent_node_info, _ = self.get_node_info(parent_path_parts)
+
+        if parent_node_info is None or parent_node_info.get('type') == 'file':
+            return "Error: Parent directory not found or is a file."
+
+        if file_name not in parent_node_info['content']:
+            return "Error: File not found."
+
+        del parent_node_info['content'][file_name]
+        return f"File '{file_name}' deleted successfully."
 
     def move_file(self, source_path_parts, destination_path_parts):
         source_node_info, source_parent_node = self.get_node_info(source_path_parts)

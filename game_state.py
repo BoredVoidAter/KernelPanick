@@ -6,6 +6,7 @@ class GameState:
         self.network_map = {} # Stores discovered network devices
         self.cpu_cycles = 100 # Initial CPU cycles
         self.ram = 100 # Initial RAM
+        self.anomaly_score = 0 # Initial anomaly score
 
     def get_current_path(self):
         return '/' + '/'.join(self.current_directory)
