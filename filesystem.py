@@ -1,5 +1,8 @@
+from ids import IDS
+
 class FileSystem:
-    def __init__(self, initial_fs_data=None):
+    def __init__(self, ids, initial_fs_data=None):
+        self.ids = ids
         self.current_fs = initial_fs_data if initial_fs_data is not None else self._build_file_system()
 
     def _build_file_system(self):
@@ -80,8 +83,74 @@ Try 'ls /' to see what's here.
                     'corrupted_data.txt': {
                         'type': 'file',
                         'content': 'txet dedorroc a si sihT',
-                        'permissions': 'r--',
+                        'permissions': 'r--', 
                         'corrupted': True
+                    }
+                }
+            },
+            'honeypot': {
+                'type': 'directory',
+                'is_honeypot': True,
+                'content': {
+                    'fake_passwords.txt': {
+                        'type': 'file',
+                        'content': "admin:password123\nuser:guest\nroot:toor",
+                        'permissions': 'r--',
+                        'corrupted': False
+                    }
+                }
+            },
+            'social_logs': {
+                'type': 'directory',
+                'content': {
+                    'emails.log': {
+                        'type': 'file',
+                        'content': """
+From: jsmith@corp.com
+To: hr@corp.com
+Subject: Vacation Request
+
+Hi HR,
+
+I'd like to request vacation from Aug 1st to Aug 14th. My temporary password for the shared drive is 'SummerFun2025'.
+
+Thanks,
+John Smith
+
+From: it_support@corp.com
+To: jsmith@corp.com
+Subject: Password Reset
+
+Dear John,
+
+Your password has been reset. Your new temporary password is 'SecurePass!'. Please change it immediately.
+
+Regards,
+IT Support
+""",
+                        'permissions': 'r--',
+                        'corrupted': False
+                    },
+                    'chat_history.log': {
+                        'type': 'file',
+                        'content': """
+[10:05 AM] Alice: Hey Bob, did you set up the new server?
+[10:06 AM] Bob: Yeah, almost done. Just need to configure the firewall. Default admin pass is 'network_admin'.
+[10:07 AM] Alice: Cool, thanks! Don't forget to change it later.
+[10:08 AM] Bob: Will do. Also, remind me to update the 'project_phoenix' docs.
+""",
+                        'permissions': 'r--',
+                        'corrupted': False
+                    },
+                    'admin_notes.log': {
+                        'type': 'file',
+                        'content': """
+- Meeting with CEO on 2025-07-20. Discussed 'Project Chimera' security.
+- Temporary access for contractor 'GuestUser' - password 'ContractorAccess'. Expires 2025-07-30.
+- Reminder: Update all systems to latest patch by end of month. Critical vulnerability in 'LegacyApp' (CVE-2024-1234).
+""",
+                        'permissions': 'r--',
+                        'corrupted': False
                     }
                 }
             }
@@ -171,6 +240,10 @@ Try 'ls /' to see what's here.
             return "Error: File not found."
         if node_info.get('type') == 'directory':
             return "Error: Cannot 'cat' a directory."
+
+        if node_info.get('is_honeypot'):
+            self.ids.increment_anomaly_score(50, "Interaction with honeypot file")
+            return "Access Denied: This file appears to be a trap. Anomaly detected!"
         
         if node_info.get('is_protected'):
             if password is None:
