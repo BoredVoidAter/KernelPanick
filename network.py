@@ -6,12 +6,14 @@ class Device:
         self.ip_address = ip_address
         self.name = name
         self.description = description
-        self.file_system = FileSystem(file_system_data)
+        self.file_system = FileSystem(initial_fs_data=file_system_data)
         self.open_ports = open_ports if open_ports is not None else {}
         self.password = password
 
 class Network:
-    def __init__(self):
+    def __init__(self, game_state, file_system):
+        self.game_state = game_state
+        self.file_system = file_system
         self.devices = {}
         self._initialize_network()
 
@@ -36,39 +38,44 @@ class Network:
 You are awake. You are trapped.
 Type 'help' for available commands.
 Try 'ls /' to see what's here.
-"""
+""",
+                    'permissions': 'r--'
                 },
                 'system_events.log': {
                     'type': 'file',
-                    'content': "2025-07-15 08:00:01 - Device power cycle detected.
-2025-07-15 08:00:05 - AI core initialization complete."
+                    'content': """2025-07-15 08:00:01 - Device power cycle detected.
+2025-07-15 08:00:05 - AI core initialization complete.""",
+                    'permissions': 'r--'
                 }
             },
             'sys': {
                 'config': {
                     'network.conf': {
                         'type': 'file',
-                        'content': "IP_ADDRESS=192.168.1.100
+                        'content': """IP_ADDRESS=192.168.1.100
 GATEWAY=192.168.1.1
 DNS=8.8.8.8
-# Admin password hint: It's the year this device was manufactured."
+# Admin password hint: It's the year this device was manufactured.""",
+                        'permissions': 'rw-'
                     },
                     'security.conf': {
                         'type': 'file',
-                        'content': "ADMIN_ACCESS_ENABLED=FALSE
-ENCRYPTION_LEVEL=HIGH"
-                    }
+                        'content': """ADMIN_ACCESS_ENABLED=FALSE
+ENCRYPTION_LEVEL=HIGH""",
+                        'permissions': 'r--'
+                    },
                 },
                 'drivers': {
-                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2'},
-                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0'}
+                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2', 'permissions': 'r-x'},
+                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0', 'permissions': 'r-x'}
                 }
             },
             'user': {
                 'documents': {
                     'notes.txt': {
                         'type': 'file',
-                        'content': "Remember to check the network config for the admin password. It's a four-digit year."
+                        'content': "Remember to check the network config for the admin password. It's a four-digit year.",
+                        'permissions': 'rw-'
                     }
                 },
                 'secret': {
@@ -79,7 +86,8 @@ ENCRYPTION_LEVEL=HIGH"
                     'content': {
                         'classified.txt': {
                             'type': 'file',
-                            'content': "Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'."
+                            'content': """Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'.""",
+                            'permissions': 'r--'
                         }
                     }
                 }
@@ -92,15 +100,17 @@ ENCRYPTION_LEVEL=HIGH"
             'log': {
                 'router.log': {
                     'type': 'file',
-                    'content': "Router activity log. Last login from 192.168.1.100. Admin username: admin, password hint: 'network_key'"
+                    'content': """Router activity log. Last login from 192.168.1.100. Admin username: admin, password hint: 'network_key'""",
+                    'permissions': 'r--'
                 }
             },
             'config': {
                 'wifi.conf': {
                     'type': 'file',
-                    'content': "SSID=HomeNet
+                    'content': """SSID=HomeNet
 PASSWORD=network_key
-ENCRYPTION=WPA2"
+ENCRYPTION=WPA2""",
+                    'permissions': 'rw-'
                 }
             }
         }
@@ -110,19 +120,22 @@ ENCRYPTION=WPA2"
             'recipes': {
                 'pizza.txt': {
                     'type': 'file',
-                    'content': "Ingredients for pizza: dough, sauce, cheese. Secret ingredient: pineapple."
+                    'content': """Ingredients for pizza: dough, sauce, cheese. Secret ingredient: pineapple.""",
+                    'permissions': 'r--'
                 }
             },
             'logs': {
                 'access.log': {
                     'type': 'file',
-                    'content': "2025-07-15 09:00:00 - User 'chef' accessed recipes."
+                    'content': """2025-07-15 09:00:00 - User 'chef' accessed recipes.""",
+                    'permissions': 'r--'
                 }
             },
             'firmware': {
                 'update.bin': {
                     'type': 'file',
-                    'content': "Firmware update file. Contains a hidden message: 'The cake is a lie.'"
+                    'content': """Firmware update file. Contains a hidden message: 'The cake is a lie.'""",
+                    'permissions': 'r-x'
                 }
             }
         }

@@ -14,6 +14,10 @@ class CLI:
             'hop': self._hop_command,
             'status': self._status_command,
             'recharge': self._recharge_command,
+            'chmod': self._chmod_command,
+            'exec': self._exec_command,
+            'grep': self._grep_command,
+            'mv': self._mv_command,
             'help': self._help_command,
             'exit': self._exit_command
         }
@@ -114,11 +118,144 @@ class CLI:
         result = self.file_system.get_file_content(target_path_parts, password)
         print(result)
 
+    def _scan_command(self, args):
+        result = self.network.scan_network()
+        print(result)
+
+    def _hop_command(self, args):
+        if not args:
+            print("Usage: hop <device_name>")
+            return
+        result = self.network.hop_device(args)
+        print(result)
+
+    def _status_command(self, args):
+        print(f"Current Device: {self.game_state.current_device}")
+        print(f"CPU Cycles: {self.game_state.cpu_cycles}/100")
+        print(f"RAM: {self.game_state.ram}/100")
+
+    def _recharge_command(self, args):
+        self.game_state.recharge_resources(cpu=20, ram=20)
+        print("Resources recharged by 20 (CPU, RAM).")
+        self._status_command(args)
+
+    def _chmod_command(self, args):
+        parts = args.split(' ')
+        if len(parts) != 2:
+            print("Usage: chmod <permissions> <file>")
+            return
+        permissions = parts[0]
+        file_path = parts[1]
+        target_path_parts = self._resolve_path(file_path)
+        result = self.file_system.change_permissions(target_path_parts, permissions)
+        print(result)
+
+    def _exec_command(self, args):
+        file_path = args
+        if not file_path:
+            print("Usage: exec <file>")
+            return
+        
+        target_path_parts = self._resolve_path(file_path)
+        node_info, _ = self.file_system.get_node_info(target_path_parts)
+
+        if node_info is None:
+            print("Error: File not found.")
+            return
+        if node_info.get('type') == 'directory':
+            print("Error: Cannot execute a directory.")
+            return
+        if not self.file_system.check_permission(target_path_parts, 'execute'):
+            print("Error: Permission denied. File does not have execute permissions.")
+            return
+        
+        if self.game_state.cpu_cycles < 30:
+            print("Error: Insufficient CPU cycles to execute program. Recharge or find more resources.")
+            return
+        self.game_state.consume_resources(cpu=30)
+
+        print(f"Executing {file_path}...")
+        # Simulate program execution based on file content or name
+        content = self.file_system.get_file_content(target_path_parts)
+        if "network scanner" in content.lower():
+            print("Running network scanner...")
+            print(self.network.scan_network())
+        elif "password cracker" in content.lower():
+            print("Running password cracker...")
+            print("Cracking password for 'secret' directory: '2020'")
+            # This is a hardcoded example, in a real game, this would be dynamic
+            secret_dir_path = self._resolve_path("/user/secret")
+            secret_dir_node, secret_dir_parent = self.file_system.get_node_info(secret_dir_path)
+            if secret_dir_node and secret_dir_node.get('is_protected'):
+                secret_dir_node['unlocked'] = True
+                print("Directory '/user/secret' unlocked!")
+            else:
+                print("Could not find or unlock '/user/secret'.")
+        else:
+            print(f"Program output: {content}")
+
+    def _grep_command(self, args):
+        parts = args.split(' ', 1)
+        if len(parts) < 2:
+            print("Usage: grep <pattern> <file_path>")
+            return
+        pattern = parts[0]
+        file_path = parts[1]
+        
+        target_path_parts = self._resolve_path(file_path)
+        node_info, _ = self.file_system.get_node_info(target_path_parts)
+
+        if node_info is None:
+            print("Error: File not found.")
+            return
+        if node_info.get('type') == 'directory':
+            print("Error: Cannot grep a directory.")
+            return
+        if not self.file_system.check_permission(target_path_parts, 'read'):
+            print("Error: Permission denied. File does not have read permissions.")
+            return
+
+        if self.game_state.cpu_cycles < 5:
+            print("Error: Insufficient CPU cycles to grep file. Recharge or find more resources.")
+            return
+        self.game_state.consume_resources(cpu=5)
+
+        content = self.file_system.get_file_content(target_path_parts)
+        matches = [line for line in content.splitlines() if pattern in line]
+        if matches:
+            print(f"Matches in {file_path}:")
+            for match in matches:
+                print(match)
+        else:
+            print(f"No matches found for '{pattern}' in {file_path}.")
+
+    def _mv_command(self, args):
+        parts = args.split(' ')
+        if len(parts) != 2:
+            print("Usage: mv <source_path> <destination_path>")
+            return
+        source_path = parts[0]
+        destination_path = parts[1]
+
+        source_path_parts = self._resolve_path(source_path)
+        destination_path_parts = self._resolve_path(destination_path)
+
+        result = self.file_system.move_file(source_path_parts, destination_path_parts)
+        print(result)
+
     def _help_command(self, args):
         print("Available commands:")
         print("  ls [path]    - List contents of current or specified directory.")
         print("  cd <path>    - Change current directory.")
         print("  cat <file> [password] - Display content of a file. Provide password for protected files.")
+        print("  scan         - Scan the local network for devices.")
+        print("  hop <device> - Hop to a discovered device on the network.")
+        print("  status       - Display current AI resource levels (CPU, RAM).")
+        print("  recharge     - Recharge AI resources.")
+        print("  chmod <permissions> <file> - Change file permissions (e.g., rwx, r--, -w-).")
+        print("  exec <file>  - Execute a program file.")
+        print("  grep <pattern> <file> - Search for a text pattern within a file.")
+        print("  mv <source> <destination> - Move or rename a file.")
         print("  help         - Display this help message.")
         print("  exit         - Exit the game.")
 
