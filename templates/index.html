@@ -47,7 +47,8 @@
         });
 
         // Initial message
-        outputDiv.innerHTML = '<div>Welcome to KernelPanic Web CLI!</div>';
+        outputDiv.innerHTML = `<div>{{ initial_output | safe }}</div>`;
+        outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to bottom
     </script>
 </body>
 </html>

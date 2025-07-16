@@ -9,7 +9,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    initial_output = game_wrapper.get_initial_boot_message()
+    return render_template('index.html', initial_output=initial_output)
 
 @app.route('/command', methods=['POST'])
 def handle_command():

@@ -56,12 +56,15 @@ def initialize_game_components():
         cli_instance = CLI(game_state_instance, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall, system_clock, botnet, sensor_simulation, actuator_control, communication_hijacking)
         scripting.cli = cli_instance # Set the CLI instance after it's created
 
+def get_initial_boot_message():
+    # Ensure components are initialized before displaying boot sequence
+    initialize_game_components()
+    return display_boot_sequence()
+
 def run_game_command(command):
     global game_state_instance, cli_instance
     if game_state_instance is None:
         initialize_game_components()
-        # Optionally display boot sequence only once
-        # display_boot_sequence()
 
     # Capture stdout for this command
     old_stdout = sys.stdout
@@ -69,14 +72,9 @@ def run_game_command(command):
     sys.stdout = redirected_output
 
     try:
-        # Simulate CLI input and execution
-        # This is a simplified example. You'll need to adapt your CLI to process a single command.
-        # For example, if your CLI has a method like cli_instance.execute_command(command):
-        # cli_instance.execute_command(command)
-        
-        # For now, just echo the command and a placeholder for game output
-        sys.stdout.write(f"Processing command: {command}\n")
-        sys.stdout.write("Game logic would execute here.\n")
+        # Call the CLI's execute_command method
+        output = cli_instance.execute_command(command)
+        sys.stdout.write(output)
 
     except Exception as e:
         sys.stdout.write(f"Error during game command execution: {e}\n")

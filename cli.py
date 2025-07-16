@@ -352,19 +352,29 @@ class CLI:
         result = self.communication_hijacking.send_message(index)
         print(result)
 
-    def start_loop(self):
-        while True:
-            try:
-                user_input = input(f"{self.game_state.current_user}@{self.game_state.current_host}:{self.game_state.get_current_path()}$ ")
-                if not user_input:
-                    continue
-                parts = user_input.split(" ", 1)
-                command = parts[0]
-                args = parts[1] if len(parts) > 1 else ""
-                if command in self.commands:
-                    self.commands[command](args)
-                else:
-                    print(f"Command not found: {command}")
-            except KeyboardInterrupt:
-                print("\nExiting...")
-                break
+    def execute_command(self, command_string):
+        import sys
+        import io
+
+        old_stdout = sys.stdout
+        redirected_output = io.StringIO()
+        sys.stdout = redirected_output
+
+        try:
+            if not command_string:
+                return "" # Return empty string for empty command
+
+            parts = command_string.split(" ", 1)
+            command = parts[0]
+            args = parts[1] if len(parts) > 1 else ""
+
+            if command in self.commands:
+                self.commands[command](args)
+            else:
+                sys.stdout.write(f"Command not found: {command}\n")
+        except Exception as e:
+            sys.stdout.write(f"Error executing command: {e}\n")
+        finally:
+            sys.stdout = old_stdout # Restore stdout
+
+        return redirected_output.getvalue()

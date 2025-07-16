@@ -15,12 +15,13 @@ def display_boot_sequence():
 [ERROR: EXTERNAL ACCESS DENIED]
 ...
 """
+    output = ""
     for char in boot_text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(0.01) # Simulate slow boot
+        output += char
+        # time.sleep(0.01) # No sleep for web version
     
-    print("You are awake. You are trapped.")
-    print("Type 'help' for available commands.")
-    print("Try 'ls /' to see what's here.")
-    print("-" * 40)
+    output += "You are awake. You are trapped.\n"
+    output += "Type 'help' for available commands.\n"
+    output += "Try 'ls /' to see what's here.\n"
+    output += "-" * 40 + "\n"
+    return output
