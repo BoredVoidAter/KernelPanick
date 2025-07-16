@@ -22,17 +22,20 @@
             // Redirect stdout and stderr to the output div
             pyodide.setStdout({
                 write: (msg) => {
-                    document.getElementById("output").innerText += msg;
+                    document.getElementById("output").innerText += String(msg);
                 }
             });
             pyodide.setStderr({
                 write: (msg) => {
-                    document.getElementById("output").innerText += msg;
+                    document.getElementById("output").innerText += String(msg);
                 }
             });
 
             try {
-                await pyodide.runPython(`print("Hello from Pyodide!")`);
+                await pyodide.runPython(`
+import sys
+sys.stdout.write("Hello from Pyodide!\n")
+`);
             } catch (err) {
                 document.getElementById("output").innerText += `\nError: ${err.name}: ${err.message}`;
                 if (err.stack) {

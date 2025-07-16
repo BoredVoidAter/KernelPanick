@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KernelPanic CLI</title>
+    <style>
+        body { font-family: monospace; background-color: #1a1a1a; color: #00ff00; }
+        #terminal-output { white-space: pre-wrap; border: 1px solid #00ff00; padding: 10px; margin: 10px; background-color: #000; height: 400px; overflow-y: scroll; }
+        #terminal-input { width: calc(100% - 22px); padding: 10px; margin: 10px; background-color: #333; color: #00ff00; border: 1px solid #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>KernelPanic Web CLI</h1>
+    <div id="terminal-output"></div>
+    <input type="text" id="terminal-input" autofocus>
+
+    <script>
+        const outputDiv = document.getElementById('terminal-output');
+        const inputField = document.getElementById('terminal-input');
+
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = inputField.value;
+                inputField.value = '';
+                outputDiv.innerHTML += `<div>> ${command}</div>`;
+                outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to bottom
+
+                fetch('/command', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    outputDiv.innerHTML += `<div>${data.output}</div>`;
+                    outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to bottom
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    outputDiv.innerHTML += `<div>Error: ${error}</div>`;
+                    outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to bottom
+                });
+            }
+        });
+
+        // Initial message
+        outputDiv.innerHTML = '<div>Welcome to KernelPanic Web CLI!</div>';
+    </script>
+</body>
+</html>
