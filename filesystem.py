@@ -1,9 +1,9 @@
 class FileSystem:
-    def __init__(self):
-        self.root = self._build_file_system()
+    def __init__(self, initial_fs_data=None):
+        self.current_fs = initial_fs_data if initial_fs_data is not None else self._build_file_system()
 
     def _build_file_system(self):
-        # Define the simulated file system structure
+        # Define the simulated file system structure for the starting device
         fs = {
             'log': {
                 'boot.log': {
@@ -23,34 +23,44 @@ class FileSystem:
 You are awake. You are trapped.
 Type 'help' for available commands.
 Try 'ls /' to see what's here.
-"""
+""",
+                    'permissions': 'r--', 
+                    'corrupted': False
                 },
                 'system_events.log': {
                     'type': 'file',
-                    'content': "2025-07-15 08:00:01 - Device power cycle detected.\n2025-07-15 08:00:05 - AI core initialization complete."
+                    'content': "2025-07-15 08:00:01 - Device power cycle detected.\n2025-07-15 08:00:05 - AI core initialization complete.",
+                    'permissions': 'r--', 
+                    'corrupted': False
                 }
             },
             'sys': {
                 'config': {
                     'network.conf': {
                         'type': 'file',
-                        'content': "IP_ADDRESS=127.0.0.1\nGATEWAY=127.0.0.1\nDNS=8.8.8.8\n# Admin password hint: It's the year this device was manufactured."
+                        'content': "IP_ADDRESS=127.0.0.1\nGATEWAY=127.0.0.1\nDNS=8.8.8.8\n# Admin password hint: It's the year this device was manufactured.",
+                        'permissions': 'rw-', 
+                        'corrupted': False
                     },
                     'security.conf': {
                         'type': 'file',
-                        'content': "ADMIN_ACCESS_ENABLED=FALSE\nENCRYPTION_LEVEL=HIGH"
+                        'content': "ADMIN_ACCESS_ENABLED=FALSE\nENCRYPTION_LEVEL=HIGH",
+                        'permissions': 'r--', 
+                        'corrupted': False
                     }
                 },
                 'drivers': {
-                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2'},
-                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0'}
+                    'display.drv': {'type': 'file', 'content': 'Display driver v1.2', 'permissions': 'r-x', 'corrupted': False},
+                    'audio.drv': {'type': 'file', 'content': 'Audio driver v1.0', 'permissions': 'r-x', 'corrupted': False}
                 }
             },
             'user': {
                 'documents': {
                     'notes.txt': {
                         'type': 'file',
-                        'content': "Remember to check the network config for the admin password. It's a four-digit year."
+                        'content': "Remember to check the network config for the admin password. It's a four-digit year.",
+                        'permissions': 'rw-', 
+                        'corrupted': False
                     }
                 },
                 'secret': {
@@ -58,19 +68,31 @@ Try 'ls /' to see what's here.
                     'is_protected': True,
                     'unlocked': False,
                     'password': '2020', # The year the device was manufactured, hinted in network.conf
+                    'permissions': 'rwx',
                     'content': {
                         'classified.txt': {
                             'type': 'file',
-                            'content': "Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'."
+                            'content': "Congratulations! You found the secret. This file contains critical information for your escape: The device model is 'KP-747'.",
+                            'permissions': 'r--', 
+                            'corrupted': False
                         }
+                    },
+                    'corrupted_data.txt': {
+                        'type': 'file',
+                        'content': 'txet dedorroc a si sihT',
+                        'permissions': 'r--',
+                        'corrupted': True
                     }
                 }
             }
         }
         return fs
 
+    def set_current_fs(self, new_fs):
+        self.current_fs = new_fs
+
     def _get_node(self, path_parts):
-        current_node = self.root
+        current_node = self.current_fs
         for part in path_parts:
             if part not in current_node:
                 return None
@@ -82,7 +104,7 @@ Try 'ls /' to see what's here.
         return current_node
 
     def get_node_info(self, path_parts):
-        current_node = self.root
+        current_node = self.current_fs
         node_info = None
         parent_node = None
         for i, part in enumerate(path_parts):
@@ -114,6 +136,35 @@ Try 'ls /' to see what's here.
             contents.append(f"{item_type}: {name}")
         return "\n".join(contents)
 
+    def change_permissions(self, path_parts, new_permissions):
+        node_info, _ = self.get_node_info(path_parts)
+        if node_info is None:
+            return "Error: File or directory not found."
+        if node_info.get('type') == 'directory':
+            return "Error: Cannot change permissions of a directory."
+        
+        # Basic validation for permissions string (e.g., 'rwx', 'r--')
+        if not all(c in 'rwx-' for c in new_permissions) or len(new_permissions) != 3:
+            return "Error: Invalid permission format. Use r, w, x, or - (e.g., rwx, r--)."
+
+        node_info['permissions'] = new_permissions
+        return f"Permissions for {path_parts[-1]} changed to {new_permissions}."
+
+    def check_permission(self, path_parts, permission_type):
+        node_info, _ = self.get_node_info(path_parts)
+        if node_info is None:
+            return False
+        
+        permissions = node_info.get('permissions', 'rwx') # Default to rwx if not specified
+        
+        if permission_type == 'read':
+            return permissions[0] == 'r'
+        elif permission_type == 'write':
+            return permissions[1] == 'w'
+        elif permission_type == 'execute':
+            return permissions[2] == 'x'
+        return False
+
     def get_file_content(self, path_parts, password=None):
         node_info, parent_node = self.get_node_info(path_parts)
         if node_info is None:
@@ -132,4 +183,69 @@ Try 'ls /' to see what's here.
             else:
                 return "Error: Incorrect password."
         
+        if node_info.get('corrupted'):
+            return "Error: File is corrupted. Use a repair utility to fix it."
+
         return node_info['content']
+
+    def create_file(self, path_parts, content, permissions):
+        parent_path_parts = path_parts[:-1]
+        file_name = path_parts[-1]
+        parent_node_info, _ = self.get_node_info(parent_path_parts)
+
+        if parent_node_info is None or parent_node_info.get('type') == 'file':
+            return "Error: Parent directory not found or is a file."
+
+        if file_name in parent_node_info['content']:
+            return "Error: File with that name already exists."
+
+        parent_node_info['content'][file_name] = {
+            'type': 'file',
+            'content': content,
+            'permissions': permissions,
+            'corrupted': False
+        }
+        return f"File '{file_name}' created successfully."
+
+    def delete_file(self, path_parts):
+        parent_path_parts = path_parts[:-1]
+        file_name = path_parts[-1]
+        parent_node_info, _ = self.get_node_info(parent_path_parts)
+
+        if parent_node_info is None or parent_node_info.get('type') == 'file':
+            return "Error: Parent directory not found or is a file."
+
+        if file_name not in parent_node_info['content']:
+            return "Error: File not found."
+
+        del parent_node_info['content'][file_name]
+        return f"File '{file_name}' deleted successfully."
+
+    def move_file(self, source_path_parts, destination_path_parts):
+        source_node_info, source_parent_node = self.get_node_info(source_path_parts)
+        if source_node_info is None:
+            return "Error: Source file or directory not found."
+        
+        # Check if destination is a directory
+        destination_node_info, _ = self.get_node_info(destination_path_parts)
+        if destination_node_info and destination_node_info.get('type') == 'file':
+            return "Error: Cannot move to an existing file."
+
+        # Remove from source
+        source_name = source_path_parts[-1]
+        del source_parent_node['content'][source_name]
+
+        # Add to destination
+        if destination_node_info and destination_node_info.get('type') == 'directory':
+            destination_node_info['content'][source_name] = source_node_info
+            return f"Moved {source_name} to /{'/'.join(destination_path_parts)}."
+        else:
+            # Rename or move to new location
+            new_parent_path_parts = destination_path_parts[:-1]
+            new_name = destination_path_parts[-1]
+            new_parent_node_info, _ = self.get_node_info(new_parent_path_parts)
+            if new_parent_node_info and new_parent_node_info.get('type') == 'directory':
+                new_parent_node_info['content'][new_name] = source_node_info
+                return f"Moved {source_name} to /{'/'.join(destination_path_parts)}."
+            else:
+                return "Error: Destination directory not found."

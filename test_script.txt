@@ -1,0 +1,3 @@
+ls /
+cd /log
+cat system_events.log
