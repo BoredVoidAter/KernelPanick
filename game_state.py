@@ -1,5 +1,7 @@
 class GameState:
     def __init__(self):
+        self.current_user = "root"
+        self.current_host = "localhost"
         self.current_directory = []  # Represents the current path as a list of directory names
         self.discovered_facts = set() # Stores facts discovered by the AI
         self.current_device = "local" # Tracks which device the AI is currently on (e.g., "local", "toaster", "fridge")

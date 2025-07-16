@@ -230,12 +230,9 @@ IT Support
             return "Error: Access denied. This directory is password protected."
 
         contents = []
-        # If node_info has a 'content' key, it's a nested directory structure
-        # Otherwise, node_info itself is the directory content (e.g., for the root)
         items_to_list = node_info.get('content', node_info)
 
         for name, info in items_to_list.items():
-            # Check if 'info' is a dictionary and has a 'type' key
             item_type = "DIR" if isinstance(info, dict) and info.get('type') == 'directory' else "FILE"
             contents.append(f"{item_type}: {name}")
         return "\n".join(contents)

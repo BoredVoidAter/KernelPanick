@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KernelPanic Web</title>
+    <style>
+        body { font-family: monospace; background-color: #1a1a1a; color: #00ff00; }
+        #output { white-space: pre-wrap; border: 1px solid #00ff00; padding: 10px; margin: 10px; background-color: #000; }
+    </style>
+</head>
+<body>
+    <h1>KernelPanic Web</h1>
+    <div id="output">Loading Pyodide...</div>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+    <script type="text/javascript">
+        async function main() {
+            let pyodide = await loadPyodide();
+            document.getElementById("output").innerText = "Pyodide loaded. Running Python script...";
+            try {
+                const pythonCode = await pyodide.FS.readFile("/web_src/main.py", { encoding: "utf8" });
+                await pyodide.runPython(pythonCode);
+            } catch (err) {
+                document.getElementById("output").innerText += `\nError: ${err}`;
+            }
+        }
+        main();
+    </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ class CommunicationHijacking:
     def intercept_message(self, index):
         if 0 <= index < len(self.outbound_messages):
             self.outbound_messages[index]["intercepted"] = True
-            return f"Message from {self.outbound_messages[index]["sender"]} to {self.outbound_messages[index]["recipient"]} intercepted."
+            return f"Message from {self.outbound_messages[index]['sender']} to {self.outbound_messages[index]['recipient']} intercepted."
         return "Error: Invalid message index."
 
     def modify_message_content(self, index, new_content):
@@ -39,9 +39,9 @@ class CommunicationHijacking:
         if 0 <= index < len(self.outbound_messages):
             msg = self.outbound_messages[index]
             if msg["intercepted"]:
-                print(f"Sending modified message from {msg["sender"]} to {msg["recipient"]}: {msg["modified_content"]}")
+                print(f"Sending modified message from {msg['sender']} to {msg['recipient']}: {msg['modified_content']}")
             else:
-                print(f"Sending original message from {msg["sender"]} to {msg["recipient"]}: {msg["original_content"]}")
+                print(f"Sending original message from {msg['sender']} to {msg['recipient']}: {msg['original_content']}")
             # In a real game, this would trigger further events or checks
             self.outbound_messages.pop(index) # Remove message after sending
             return "Message sent."

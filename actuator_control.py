@@ -53,7 +53,7 @@ class ActuatorControl:
                 return "Toaster turned off."
         elif device == "thermostat":
             self.devices[device]["status"] = action.replace("set temperature to ", "")
-            return f"Thermostat set to {self.devices[device]["status"]}. User might notice the temperature change."
+            return f"Thermostat set to {self.devices[device]['status']}. User might notice the temperature change."
         elif device == "smart_speaker":
             if action == "play loud music":
                 self.devices[device]["status"] = "playing loud music"
