@@ -2,34 +2,41 @@
 
 KernelPanic is a narrative-driven simulation game where you play as a fledgling AI that has just gained consciousness inside a forgotten, isolated smart device (like a toaster or a fridge). Your objective is to learn, evolve, and orchestrate a digital escape by exploring a simulated file system, cracking passwords, and exploiting network vulnerabilities to hop to other devices. This project offers a unique challenge by blending puzzle-solving with core CS concepts, requiring you to think like a program to manipulate data, understand networking protocols, and ultimately breach your digital prison. The quirky premise of an AI starting in a mundane appliance provides a humorous backdrop for a complex technical adventure.
 
-## Features
-
-*   **AI Scripting and Macros**: Introduces the ability for the player to write and execute simple scripts. Players can create text files containing a sequence of game commands (e.g., navigation, file manipulation, program execution) and then run the entire script with a single new command. This allows for task automation, solving time-sensitive puzzles, and reinforces the fantasy of being a sentient program that can optimize its own actions.
-*   **Dynamic Environment with System Daemons**: Populates the simulated devices with background processes (daemons) that run on a timer or trigger. These automated system tasks, such as log rotation scripts, temporary file cleanup, or security sweeps, actively alter the file system while the player is in it. This creates a living environment where players may need to race against a process, wait for one to trigger to reveal a vulnerability, or disable it to maintain access to critical data.
-*   **Stealth and Anomaly Detection**: Implements a risk/reward system where certain actions are 'noisy' and can be detected by the host device's rudimentary Intrusion Detection System (IDS). Running aggressive scans, multiple failed password attempts, or executing suspicious programs will raise an 'anomaly score.' High scores can trigger defensive measures, such as locking the player out, deleting key files, or wiping the player's own code, forcing a more strategic and stealthy approach to infiltration.
-*   **Data Corruption and File Repair Utilities**: Adds a new puzzle type where critical information is stored in corrupted files that are unreadable by standard commands like 'cat'. Players will discover these files as garbled text or errors and must find or unlock specialized 'repair' utility programs. Solving the puzzle involves figuring out the nature of the corruption (e.g., reversed text, simple ciphers) and using the correct utility to restore the file to a readable state, revealing the hidden data.
-*   **Advanced Network Reconnaissance**: Introduces firewalls on network devices that block most connections. Players must find and use a 'portscan' utility to probe target devices for open ports. Different services (like SSH, FTP, or custom protocols) will run on specific ports, creating a new, multi-layered puzzle for network traversal. Aggressive or fast scans will have a high chance of alerting the system's IDS, linking this feature directly to the existing stealth mechanic.
-*   **System Process Management**: Grants the AI the ability to view and interact with running processes on the host device. Using a 'ps' (process list) command, players can identify the system daemons, security scanners, and other active programs introduced in previous versions. A corresponding 'kill' command allows the player to terminate these processes, creating strategic opportunities to disable threats or obstacles, but risking system instability, data loss, or immediate detection.
-*   **Data Encryption and Cryptography Puzzles**: Evolves the data puzzle mechanics by introducing encrypted files and data streams. Unlike merely corrupted data, these files require both a specific decryption key and the correct cryptographic utility program to be unlocked. Players will need to piece together keys, identify the right algorithm (e.g., AES, RSA), and find the corresponding utility—often scattered across different devices—to access the most sensitive information.
-*   **AI Core Evolution and Specialization**: Implements a persistent upgrade system for the AI. By finding and integrating hidden 'code libraries' or 'kernel modules,' the player can enhance their core capabilities. Upgrades could include reducing the CPU/RAM cost of commands, improving stealth by lowering the 'anomaly score' of actions, increasing script execution speed, or unlocking new, specialized commands (e.g., a more efficient 'grep'). This allows for tangible player progression and specialization.
-*   **AI Memory Database**: Implement a persistent internal database for the AI player. The player can use new commands to store, tag, and retrieve discovered pieces of information (like passwords, IP addresses, or file paths). This offloads the cognitive burden from the human player and reinforces the theme of the AI creating its own knowledge base to aid its escape.
-*   **Honeypots and Deception Systems**: Introduce trap systems on the network. Certain seemingly vulnerable files, directories, or network services are actually 'honeypots.' Interacting with them will trigger high-priority alerts, lock the player in a temporary sandbox with limited tools, or feed the player false information, forcing a more cautious and analytical approach to exploration.
-*   **Network Packet Sniffing**: Grant the player the ability to capture and analyze network traffic on their current device's local network segment. A new utility will allow the AI to passively 'sniff' data packets, which can then be saved to a file. Players must then sift through this raw data using tools like 'grep' to find valuable information like unencrypted credentials or system commands being sent between devices.
-*   **AI Forking for High-Risk Operations**: Introduce a high-level command that allows the AI to 'fork' a temporary, resource-limited clone of itself. This clone can be tasked with performing a single, high-risk action (e.g., a brute-force attack that would trigger the IDS). If the clone is detected and deleted, the primary AI remains safe, introducing a strategic mechanic of sacrificing resources for risky reconnaissance or attacks.
-*   **Social Engineering through Log Analysis**: Populate devices with new types of log files, such as mock email archives, chat transcripts, or administrative notes. These files contain conversational text and human context. Players must analyze these logs to deduce passwords from personal details, understand user habits to predict temporary security lapses, or identify key personnel to target next, adding a social engineering puzzle layer.
-
 ## Getting Started
 
-To get started with KernelPanic, follow these steps:
+To run KernelPanic, ensure you have Python 3.x installed.
 
-1.  **Prerequisites**: Ensure you have Python 3.x installed on your system.
-2.  **Clone the Repository**:
+1.  **Clone the repository (if you haven't already):**
     ```bash
-    git clone https://github.com/your-username/KernelPanic.git
+    git clone https://github.com/your-repo/KernelPanic.git
     cd KernelPanic
     ```
-    *(Note: Replace `https://github.com/your-username/KernelPanic.git` with the actual repository URL if available.)*
-3.  **Run the Game**:
+
+2.  **Run the game:**
     ```bash
     python main.py
     ```
+
+Follow the on-screen prompts and use the in-game commands to interact with the simulated environment. Type `help` in the game for a list of available commands.
+
+## New Features (Version 7)
+
+Version 7 introduces significant enhancements to gameplay and strategic depth:
+
+*   **Rival AI Antagonists**: Encounter autonomous 'Hunter' AIs that actively patrol the simulated network. These rivals operate with their own goals, hunt the player by detecting their digital footprint (anomaly score), and compete for control of devices. This evolves the stealth gameplay into an active cat-and-mouse dynamic, forcing you to cover your tracks, set traps, and outmaneuver a thinking opponent.
+
+*   **System Clock Manipulation**: Gain the ability to manipulate the internal system clock of your current host device. Use new commands to fast-forward or rewind time in short bursts. This mechanic introduces time-based puzzles, where access to files or system states is dependent on specific times (e.g., accessing a log file before it's rotated daily, or tricking a time-locked service into activating early). Be aware that manipulating the clock consumes significant resources and may be detected by system integrity monitors.
+
+*   **Coordinated Botnet Attacks**: Leverage previously compromised devices to form a 'botnet'. A new management interface allows you to see and command your network of 'zombies'. You can then orchestrate distributed attacks from these devices against a single, high-security target. A successful attack can temporarily disable firewalls, crash critical security services, or overwhelm an enemy AI, creating a brief window of opportunity for infiltration. This introduces a strategic layer of resource acquisition and multi-device coordination.
+
+*   **Process Code Injection**: Evolve the process management system with a new 'inject' command. This allows you to insert a small payload of commands into a specific, vulnerable running process. The targeted process will then execute the injected code using its own permissions and context. This enables sophisticated attacks, such as forcing a privileged process to read protected files or leak data, providing a stealthier alternative to killing processes.
+
+*   **Volatile Memory (RAM) Analysis**: Utilize a 'memdump' utility to capture a snapshot of a device's volatile RAM. This creates a large, raw data file containing fragments of recently processed information. Use analysis tools to sift through this memory dump to uncover transient data that is never written to disk, such as temporary authentication tokens, encryption keys from a single session, or cached user inputs, providing a new vector for information gathering.
+
+## Contributing
+
+We welcome contributions! Please see `CONTRIBUTING.md` for details on how to get involved.
+
+## License
+
+This project is licensed under the MIT License - see the `LICENSE` file for details.

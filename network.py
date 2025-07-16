@@ -9,6 +9,11 @@ class Device:
         self.file_system = FileSystem(ids, initial_fs_data=file_system_data)
         self.open_ports = open_ports if open_ports is not None else {}
         self.password = password
+        self.connections = {} # Added for HunterAI
+        self.owner = None # Added for HunterAI
+
+    def set_owner(self, owner):
+        self.owner = owner
 
 class Network:
     def __init__(self, game_state, file_system, ids):

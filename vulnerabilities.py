@@ -1,3 +1,7 @@
+import logging
+
+MAX_PAYLOAD_LENGTH = 1024
+
 class Vulnerability:
     def __init__(self, vulnerability_id, name, description, payload_format, effect):
         self.vulnerability_id = vulnerability_id
@@ -33,3 +37,11 @@ VULNERABILITIES = {
 
 def get_vulnerability(vulnerability_id):
     return VULNERABILITIES.get(vulnerability_id)
+
+def process_payload_data(payload):
+    if len(payload) > MAX_PAYLOAD_LENGTH:
+        logging.error(f"Payload too large: {len(payload)} bytes, max is {MAX_PAYLOAD_LENGTH}")
+        return False
+    # Some existing logic here
+    logging.info(f"Processing payload: {payload[:50]}...")
+    return True
