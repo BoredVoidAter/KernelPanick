@@ -5,6 +5,9 @@ class FileSystem:
         self.ids = ids
         self.current_fs = initial_fs_data if initial_fs_data is not None else self._build_file_system()
 
+    def set_ids(self, ids):
+        self.ids = ids
+
     def _build_file_system(self):
         # Define the simulated file system structure for the starting device
         fs = {
@@ -173,6 +176,9 @@ IT Support
         return current_node
 
     def get_node_info(self, path_parts):
+        if not path_parts: # If path_parts is empty, it means we are looking for the root
+            return self.current_fs, None # Return the root node and no parent
+            
         current_node = self.current_fs
         node_info = None
         parent_node = None
@@ -200,8 +206,13 @@ IT Support
             return "Error: Access denied. This directory is password protected."
 
         contents = []
-        for name, info in node_info['content'].items():
-            item_type = "DIR" if info.get('type') == 'directory' else "FILE"
+        # If node_info has a 'content' key, it's a nested directory structure
+        # Otherwise, node_info itself is the directory content (e.g., for the root)
+        items_to_list = node_info.get('content', node_info)
+
+        for name, info in items_to_list.items():
+            # Check if 'info' is a dictionary and has a 'type' key
+            item_type = "DIR" if isinstance(info, dict) and info.get('type') == 'directory' else "FILE"
             contents.append(f"{item_type}: {name}")
         return "\n".join(contents)
 

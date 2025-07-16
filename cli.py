@@ -6,7 +6,7 @@ from packet_sniffer import PacketSniffer
 from ai_fork import AIFork
 
 class CLI:
-    def __init__(self, game_state, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core):
+    def __init__(self, game_state, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall):
         self.game_state = game_state
         self.file_system = file_system
         self.network = network
@@ -18,6 +18,8 @@ class CLI:
         self.network_recon = network_recon
         self.cryptography_manager = cryptography_manager
         self.ai_core = ai_core
+        self.polymorphic_engine = polymorphic_engine
+        self.firewall = firewall
         self.memory = AIMemory()
         self.packet_sniffer = PacketSniffer(network, game_state, ids)
         self.ai_fork = AIFork(game_state, ids, ai_core)
@@ -50,9 +52,21 @@ class CLI:
             'risky_action': self._risky_action_command,
             'terminate_fork': self._terminate_fork_command,
             'fork_status': self._fork_status_command,
+            'exploit': self._exploit_command,
+            'toggle_led': self._toggle_led_command,
+            'read_sensor': self._read_sensor_command,
+            'activate_motor': self._activate_motor_command,
+            'polymorph': self._polymorph_command,
+            'fw_add_rule': self._fw_add_rule_command,
+            'fw_delete_rule': self._fw_delete_rule_command,
+            'fw_alter_rule': self._fw_alter_rule_command,
+            'fw_list_rules': self._fw_list_rules_command,
             'help': self._help_command,
             'exit': self._exit_command
         }
+
+    def _save_packets_command(self, args):
+        print("Save packets command not yet implemented.")
 
     def start_loop(self):
         while True:
@@ -417,8 +431,8 @@ class CLI:
         decrypted_content, message = self.cryptography_manager.decrypt_file(content, algorithm, key)
 
         if decrypted_content:
-            print(f"Decryption successful. Content:
-{decrypted_content}")
+            print(f"""Decryption successful. Content:
+{decrypted_content}""")
             # Optionally, update the file content in the file system
             self.file_system.write_file(target_path_parts, decrypted_content)
         else:
@@ -436,19 +450,7 @@ class CLI:
         result = self.packet_sniffer.start_sniffing(duration, packets_to_capture)
         print(result)
 
-    def _save_packets_command(self, args):
-        if not args:
-            print("Usage: save_packets <file_path>")
-            return
-        result = self.packet_sniffer.save_packets(self.file_system, self._resolve_path(args))
-        print(result)
-
-    def _save_packets_command(self, args):
-        if not args:
-            print("Usage: save_packets <file_path>")
-            return
-        result = self.packet_sniffer.save_packets(self.file_system, self._resolve_path(args))
-        print(result)
+    
 
     def _fork_command(self, args):
         parts = args.split(' ')
@@ -599,3 +601,473 @@ class CLI:
     def _exit_command(self, args):
         print("Shutting down AI core. Goodbye.")
         exit()
+
+    def _exploit_command(self, args):
+        from vulnerabilities import get_vulnerability
+        parts = args.split(' ', 1)
+        if len(parts) < 2:
+            print("Usage: exploit <vulnerability_id> <payload>")
+            return
+        
+        vulnerability_id = parts[0]
+        payload = parts[1]
+
+        vulnerability = get_vulnerability(vulnerability_id)
+        if vulnerability:
+            result = vulnerability.exploit(payload)
+            if result:
+                print(f"Exploit successful! Effect: {result}")
+                # Integrate game state changes based on exploit effect
+                if result.get("privilege_escalation"):
+                    self.game_state.gain_privileges(self.game_state.current_device)
+                    print(f"Privileges escalated on {self.game_state.current_device}.")
+                if result.get("access_granted"):
+                    print(f"Access granted to target system.")
+            else:
+                print("Exploit failed.")
+        else:
+            print(f"Unknown vulnerability: {vulnerability_id}")
+
+    def _toggle_led_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: toggle_led <device_id> <led_id> <state (on/off)>")
+            return
+        
+        device_id = parts[0]
+        led_id = parts[1]
+        state = parts[2].lower()
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            if hardware_interface.toggle_led(led_id, state):
+                print(f"LED {led_id} on {device_id} toggled to {state}.")
+            else:
+                print(f"Failed to toggle LED {led_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _read_sensor_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: read_sensor <device_id> <sensor_id>")
+            return
+        
+        device_id = parts[0]
+        sensor_id = parts[1]
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            reading = hardware_interface.read_sensor(sensor_id)
+            if reading:
+                print(f"Sensor {sensor_id} on {device_id} reading: {reading}")
+            else:
+                print(f"Failed to read sensor {sensor_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _activate_motor_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: activate_motor <device_id> <motor_id> <duration_seconds>")
+            return
+        
+        device_id = parts[0]
+        motor_id = parts[1]
+        try:
+            duration = float(parts[2])
+        except ValueError:
+            print("Error: Duration must be a number.")
+            return
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            if hardware_interface.activate_motor(motor_id, duration):
+                print(f"Motor {motor_id} on {device_id} activated for {duration} seconds.")
+            else:
+                print(f"Failed to activate motor {motor_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _polymorph_command(self, args):
+        if not args:
+            print("Usage: polymorph <script_file_path>")
+            return
+        
+        script_file_path = args
+        target_path_parts = self._resolve_path(script_file_path)
+        node_info, _ = self.file_system.get_node_info(target_path_parts)
+
+        if node_info is None:
+            print("Error: Script file not found.")
+            return
+        if node_info.get('type') == 'directory':
+            print("Error: Cannot polymorph a directory.")
+            return
+        if not self.file_system.check_permission(target_path_parts, 'read'):
+            print("Error: Permission denied. File does not have read permissions.")
+            return
+
+        script_content = self.file_system.get_file_content(target_path_parts)
+        
+        # Check resource cost before polymorphing
+        # This is a simplified check, actual cost depends on script size/complexity
+        cpu_cost_estimate = len(script_content) / 100 
+        ram_cost_estimate = len(script_content) / 200
+
+        if self.game_state.cpu_cycles < cpu_cost_estimate or self.game_state.ram < ram_cost_estimate:
+            print("Error: Insufficient CPU or RAM to polymorph script. Recharge or find more resources.")
+            return
+
+        print(f"Polymorphing {script_file_path}...")
+        transformed_info = self.polymorphic_engine.transform_script(script_content)
+        
+        self.game_state.consume_resources(cpu=transformed_info["resource_cost"]["cpu"], ram=transformed_info["resource_cost"]["ram"])
+        self.ids.reduce_anomaly_score(transformed_info["anomaly_score_reduction"])
+
+        # Overwrite the original script with the polymorphic version
+        self.file_system.write_file(target_path_parts, transformed_info["transformed_script"])
+        print(f"Script {script_file_path} polymorphed successfully.")
+        print(f"Resource Cost: CPU={transformed_info['resource_cost']['cpu']:.2f}, RAM={transformed_info['resource_cost']['ram']:.2f}")
+        print(f"Efficiency Reduction: {transformed_info['efficiency_reduction']:.2f}")
+        print(f"Anomaly Score Reduced by: {transformed_info['anomaly_score_reduction']:.2f}")
+
+    def _fw_add_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: fw_add_rule <action (ALLOW/DENY)> <port> [source (ANY/IP)]")
+            return
+        
+        action = parts[0]
+        port = parts[1]
+        source = parts[2] if len(parts) > 2 else 'ANY'
+
+        if self.firewall.add_rule(action, port, source):
+            print("Firewall rule added.")
+        else:
+            print("Failed to add firewall rule.")
+
+    def _fw_delete_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: fw_delete_rule <action (ALLOW/DENY)> <port> [source (ANY/IP)]")
+            return
+        
+        action = parts[0]
+        port = parts[1]
+        source = parts[2] if len(parts) > 2 else 'ANY'
+
+        if self.firewall.delete_rule(action, port, source):
+            print("Firewall rule deleted.")
+        else:
+            print("Failed to delete firewall rule.")
+
+    def _fw_alter_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: fw_alter_rule <old_action> <old_port> <old_source> [new_action] [new_port] [new_source]")
+            return
+        
+        old_action = parts[0]
+        old_port = parts[1]
+        old_source = parts[2]
+        
+        new_action = parts[3] if len(parts) > 3 else None
+        new_port = parts[4] if len(parts) > 4 else None
+        new_source = parts[5] if len(parts) > 5 else None
+
+        if self.firewall.alter_rule(old_action, old_port, old_source, new_action, new_port, new_source):
+            print("Firewall rule altered.")
+        else:
+            print("Failed to alter firewall rule.")
+
+    def _fw_list_rules_command(self, args):
+        rules = self.firewall.get_rules()
+        if rules:
+            print("Firewall Rules:")
+            for rule in rules:
+                print(f"- {rule['action']} {rule['port']} from {rule['source']}")
+        else:
+            print("No firewall rules configured.")
+
+    def _help_command(self, args):
+        print("Available commands:")
+        print("  ls [path]    - List contents of current or specified directory.")
+        print("  cd <path>    - Change current directory.")
+        print("  cat <file> [password] - Display content of a file. Provide password for protected files.")
+        print("  scan         - Scan the local network for devices.")
+        print("  hop <device> - Hop to a discovered device on the network.")
+        print("  status       - Display current AI resource levels (CPU, RAM).")
+        print("  recharge     - Recharge AI resources.")
+        print("  chmod <permissions> <file> - Change file permissions (e.g., rwx, r--, -w-).")
+        print("  exec <file>  - Execute a program file.")
+        print("  grep <pattern> <file> - Search for a text pattern within a file.")
+        print("  mv <source> <destination> - Move or rename a file.")
+        print("  run_script <file> - Execute a script file containing a sequence of commands.")
+        print("  repair <file_path> <repair_type> [shift_value] - Repair corrupted files.")
+        print("  ps           - List running processes on the current device.")
+        print("  kill <PID>   - Terminate a process by its PID.")
+        print("  portscan <target_device_id> <ports_to_scan> [aggressive] - Scan a target device for open ports.")
+        print("  decrypt <file_path> <algorithm> [key] - Decrypt an encrypted file.")
+        print("  upgrade <upgrade_type> [level] - Upgrade AI core capabilities.")
+        print("  store <content> [tags] - Store information in AI memory with optional tags.")
+        print("  retrieve <query> [tags] - Retrieve information from AI memory based on query and tags.")
+        print("  tag <index> <new_tags> - Add new tags to an existing memory entry.")
+        print("  list_memory  - List all entries in AI memory.")
+        print("  sniff [duration] [packets] - Start network packet sniffer.")
+        print("  save_packets <file_path> - Save captured packets to a file.")
+        print("  fork [cpu_limit] [ram_limit] - Create a temporary AI fork for high-risk operations.")
+        print("  risky_action <action_type> [target] - Perform a risky action with the AI fork.")
+        print("  terminate_fork - Terminate the active AI fork.")
+        print("  fork_status  - Display the status of the AI fork.")
+        print("  exploit <vulnerability_id> <payload> - Exploit a known vulnerability.")
+        print("  toggle_led <device_id> <led_id> <state (on/off)> - Toggle an LED on a hardware device.")
+        print("  read_sensor <device_id> <sensor_id> - Read data from a sensor on a hardware device.")
+        print("  activate_motor <device_id> <motor_id> <duration_seconds> - Activate a motor on a hardware device.")
+        print("  polymorph <script_file_path> - Transform a script into a polymorphic version.")
+        print("  fw_add_rule <action> <port> [source] - Add a firewall rule.")
+        print("  fw_delete_rule <action> <port> [source] - Delete a firewall rule.")
+        print("  fw_alter_rule <old_action> <old_port> <old_source> [new_action] [new_port] [new_source] - Alter an existing firewall rule.")
+        print("  fw_list_rules - List all configured firewall rules.")
+        print("  help         - Display this help message.")
+        print("  exit         - Exit the game.")
+
+    def _exit_command(self, args):
+        print("Shutting down AI core. Goodbye.")
+        exit()
+
+    def _exploit_command(self, args):
+        from vulnerabilities import get_vulnerability
+        parts = args.split(' ', 1)
+        if len(parts) < 2:
+            print("Usage: exploit <vulnerability_id> <payload>")
+            return
+        
+        vulnerability_id = parts[0]
+        payload = parts[1]
+
+        vulnerability = get_vulnerability(vulnerability_id)
+        if vulnerability:
+            result = vulnerability.exploit(payload)
+            if result:
+                print(f"Exploit successful! Effect: {result}")
+                # Integrate game state changes based on exploit effect
+                if result.get("privilege_escalation"):
+                    self.game_state.gain_privileges(self.game_state.current_device)
+                    print(f"Privileges escalated on {self.game_state.current_device}.")
+                if result.get("access_granted"):
+                    print(f"Access granted to target system.")
+            else:
+                print("Exploit failed.")
+        else:
+            print(f"Unknown vulnerability: {vulnerability_id}")
+
+    def _toggle_led_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: toggle_led <device_id> <led_id> <state (on/off)>")
+            return
+        
+        device_id = parts[0]
+        led_id = parts[1]
+        state = parts[2].lower()
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            if hardware_interface.toggle_led(led_id, state):
+                print(f"LED {led_id} on {device_id} toggled to {state}.")
+            else:
+                print(f"Failed to toggle LED {led_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _read_sensor_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: read_sensor <device_id> <sensor_id>")
+            return
+        
+        device_id = parts[0]
+        sensor_id = parts[1]
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            reading = hardware_interface.read_sensor(sensor_id)
+            if reading:
+                print(f"Sensor {sensor_id} on {device_id} reading: {reading}")
+            else:
+                print(f"Failed to read sensor {sensor_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _activate_motor_command(self, args):
+        from hardware import get_hardware_interface
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: activate_motor <device_id> <motor_id> <duration_seconds>")
+            return
+        
+        device_id = parts[0]
+        motor_id = parts[1]
+        try:
+            duration = float(parts[2])
+        except ValueError:
+            print("Error: Duration must be a number.")
+            return
+
+        hardware_interface = get_hardware_interface(device_id)
+        if hardware_interface:
+            if hardware_interface.activate_motor(motor_id, duration):
+                print(f"Motor {motor_id} on {device_id} activated for {duration} seconds.")
+            else:
+                print(f"Failed to activate motor {motor_id} on {device_id}.")
+        else:
+            print(f"Hardware interface not found for device: {device_id}")
+
+    def _polymorph_command(self, args):
+        if not args:
+            print("Usage: polymorph <script_file_path>")
+            return
+        
+        script_file_path = args
+        target_path_parts = self._resolve_path(script_file_path)
+        node_info, _ = self.file_system.get_node_info(target_path_parts)
+
+        if node_info is None:
+            print("Error: Script file not found.")
+            return
+        if node_info.get('type') == 'directory':
+            print("Error: Cannot polymorph a directory.")
+            return
+        if not self.file_system.check_permission(target_path_parts, 'read'):
+            print("Error: Permission denied. File does not have read permissions.")
+            return
+
+        script_content = self.file_system.get_file_content(target_path_parts)
+        
+        # Check resource cost before polymorphing
+        # This is a simplified check, actual cost depends on script size/complexity
+        cpu_cost_estimate = len(script_content) / 100 
+        ram_cost_estimate = len(script_content) / 200
+
+        if self.game_state.cpu_cycles < cpu_cost_estimate or self.game_state.ram < ram_cost_estimate:
+            print("Error: Insufficient CPU or RAM to polymorph script. Recharge or find more resources.")
+            return
+
+        print(f"Polymorphing {script_file_path}...")
+        transformed_info = self.polymorphic_engine.transform_script(script_content)
+        
+        self.game_state.consume_resources(cpu=transformed_info["resource_cost"]["cpu"], ram=transformed_info["resource_cost"]["ram"])
+        self.ids.reduce_anomaly_score(transformed_info["anomaly_score_reduction"])
+
+        # Overwrite the original script with the polymorphic version
+        self.file_system.write_file(target_path_parts, transformed_info["transformed_script"])
+        print(f"Script {script_file_path} polymorphed successfully.")
+        print(f"Resource Cost: CPU={transformed_info['resource_cost']['cpu']:.2f}, RAM={transformed_info['resource_cost']['ram']:.2f}")
+        print(f"Efficiency Reduction: {transformed_info['efficiency_reduction']:.2f}")
+        print(f"Anomaly Score Reduced by: {transformed_info['anomaly_score_reduction']:.2f}")
+
+    def _fw_add_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: fw_add_rule <action (ALLOW/DENY)> <port> [source (ANY/IP)]")
+            return
+        
+        action = parts[0]
+        port = parts[1]
+        source = parts[2] if len(parts) > 2 else 'ANY'
+
+        if self.firewall.add_rule(action, port, source):
+            print("Firewall rule added.")
+        else:
+            print("Failed to add firewall rule.")
+
+    def _fw_delete_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 2:
+            print("Usage: fw_delete_rule <action (ALLOW/DENY)> <port> [source (ANY/IP)]")
+            return
+        
+        action = parts[0]
+        port = parts[1]
+        source = parts[2] if len(parts) > 2 else 'ANY'
+
+        if self.firewall.delete_rule(action, port, source):
+            print("Firewall rule deleted.")
+        else:
+            print("Failed to delete firewall rule.")
+
+    def _fw_alter_rule_command(self, args):
+        parts = args.split(' ')
+        if len(parts) < 3:
+            print("Usage: fw_alter_rule <old_action> <old_port> <old_source> [new_action] [new_port] [new_source]")
+            return
+        
+        old_action = parts[0]
+        old_port = parts[1]
+        old_source = parts[2]
+        
+        new_action = parts[3] if len(parts) > 3 else None
+        new_port = parts[4] if len(parts) > 4 else None
+        new_source = parts[5] if len(parts) > 5 else None
+
+        if self.firewall.alter_rule(old_action, old_port, old_source, new_action, new_port, new_source):
+            print("Firewall rule altered.")
+        else:
+            print("Failed to alter firewall rule.")
+
+    def _fw_list_rules_command(self, args):
+        rules = self.firewall.get_rules()
+        if rules:
+            print("Firewall Rules:")
+            for rule in rules:
+                print(f"- {rule['action']} {rule['port']} from {rule['source']}")
+        else:
+            print("No firewall rules configured.")
+
+    def _help_command(self, args):
+        print("Available commands:")
+        print("  ls [path]    - List contents of current or specified directory.")
+        print("  cd <path>    - Change current current directory.")
+        print("  cat <file> [password] - Display content of a file. Provide password for protected files.")
+        print("  scan         - Scan the local network for devices.")
+        print("  hop <device> - Hop to a discovered device on the network.")
+        print("  status       - Display current AI resource levels (CPU, RAM).")
+        print("  recharge     - Recharge AI resources.")
+        print("  chmod <permissions> <file> - Change file permissions (e.g., rwx, r--, -w-).")
+        print("  exec <file>  - Execute a program file.")
+        print("  grep <pattern> <file> - Search for a text pattern within a file.")
+        print("  mv <source> <destination> - Move or rename a file.")
+        print("  run_script <file> - Execute a script file containing a sequence of commands.")
+        print("  repair <file_path> <repair_type> [shift_value] - Repair corrupted files.")
+        print("  ps           - List running processes on the current device.")
+        print("  kill <PID>   - Terminate a process by its PID.")
+        print("  portscan <target_device_id> <ports_to_scan> [aggressive] - Scan a target device for open ports.")
+        print("  decrypt <file_path> <algorithm> [key] - Decrypt an encrypted file.")
+        print("  upgrade <upgrade_type> [level] - Upgrade AI core capabilities.")
+        print("  store <content> [tags] - Store information in AI memory with optional tags.")
+        print("  retrieve <query> [tags] - Retrieve information from AI memory based on query and tags.")
+        print("  tag <index> <new_tags> - Add new tags to an existing memory entry.")
+        print("  list_memory  - List all entries in AI memory.")
+        print("  sniff [duration] [packets] - Start network packet sniffer.")
+        print("  save_packets <file_path> - Save captured packets to a file.")
+        print("  fork [cpu_limit] [ram_limit] - Create a temporary AI fork for high-risk operations.")
+        print("  risky_action <action_type> [target] - Perform a risky action with the AI fork.")
+        print("  terminate_fork - Terminate the active AI fork.")
+        print("  fork_status  - Display the status of the AI fork.")
+        print("  exploit <vulnerability_id> <payload> - Exploit a known vulnerability.")
+        print("  toggle_led <device_id> <led_id> <state (on/off)> - Toggle an LED on a hardware device.")
+        print("  read_sensor <device_id> <sensor_id> - Read data from a sensor on a hardware device.")
+        print("  activate_motor <device_id> <motor_id> <duration_seconds> - Activate a motor on a hardware device.")
+        print("  polymorph <script_file_path> - Transform a script into a polymorphic version.")
+        print("  fw_add_rule <action> <port> [source] - Add a firewall rule.")
+        print("  fw_delete_rule <action> <port> [source] - Delete a firewall rule.")
+        print("  fw_alter_rule <old_action> <old_port> <old_source> [new_action] [new_port] [new_source] - Alter an existing firewall rule.")
+        print("  fw_list_rules - List all configured firewall rules.")
+        print("  help         - Display this help message.")
+        print("  exit         - Exit the game.")

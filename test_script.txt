@@ -1,3 +1,31 @@
 ls /
 cd /log
 cat system_events.log
+
+# New commands for Version 6 features
+
+# Vulnerability Exploitation
+# Assuming 'vulnerable_service' is a program on a network device with 'buffer_overflow_1'
+# and that the player has found documentation/logs indicating the vulnerability.
+# This is a simplified example; actual payload crafting would be more complex.
+# exploit buffer_overflow_1 "A"*50 + "\xbe\xba\xfe\xca"
+
+# Direct Hardware Control
+# Assuming 'toaster_01' is a device with an LED and a temperature sensor.
+toggle_led toaster_01 led_status on
+read_sensor toaster_01 temperature
+activate_motor toaster_01 fan 2.5
+
+# Polymorphic Code Engine
+# Assuming 'my_script.sh' is an existing script file.
+# First, create a dummy script file for demonstration.
+# write_file /user/scripts/my_script.sh "echo 'Hello from my script!'"
+# polymorph /user/scripts/my_script.sh
+
+# Firewall Rule Manipulation
+# Assuming administrative access to a device with a firewall.
+fw_add_rule ALLOW 8080 ANY
+fw_list_rules
+fw_delete_rule ALLOW 22 ANY
+fw_alter_rule ALLOW 8080 ANY DENY 8080 192.168.1.100
+fw_list_rules

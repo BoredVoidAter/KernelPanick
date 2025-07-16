@@ -2,18 +2,19 @@ import random
 from filesystem import FileSystem
 
 class Device:
-    def __init__(self, ip_address, name, description, file_system_data, open_ports=None, password=None):
+    def __init__(self, ip_address, name, description, file_system_data, ids, open_ports=None, password=None):
         self.ip_address = ip_address
         self.name = name
         self.description = description
-        self.file_system = FileSystem(initial_fs_data=file_system_data)
+        self.file_system = FileSystem(ids, initial_fs_data=file_system_data)
         self.open_ports = open_ports if open_ports is not None else {}
         self.password = password
 
 class Network:
-    def __init__(self, game_state, file_system):
+    def __init__(self, game_state, file_system, ids):
         self.game_state = game_state
         self.file_system = file_system
+        self.ids = ids
         self.devices = {}
         self._initialize_network()
 
@@ -93,7 +94,7 @@ ENCRYPTION_LEVEL=HIGH""",
                 }
             }
         }
-        self.add_device(Device('192.168.1.100', 'Toaster', 'Your starting point, a smart toaster.', initial_device_fs, {80: 'Web Server (placeholder)'}))
+        self.add_device(Device('192.168.1.100', 'Toaster', 'Your starting point, a smart toaster.', initial_device_fs, self.ids, {80: 'Web Server (placeholder)'}))
 
         # Add other devices to the network
         router_fs = {
