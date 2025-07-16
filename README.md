@@ -8,11 +8,18 @@ To run KernelPanic, ensure you have Python 3.x installed.
 
 1.  **Clone the repository (if you haven't already):**
     ```bash
+<<<<<<< HEAD
     git clone https://github.com/your-repo/KernelPanic.git
     cd KernelPanic
     ```
 
 2.  **Run the game:**
+=======
+    git clone https://github.com/BoredVoidAter/KernelPanic.git
+    cd KernelPanic
+    ```
+3.  **Run the Game**:
+>>>>>>> 0834760238f3a5733e38bf7aad817d63190dd0c8
     ```bash
     python main.py
     ```
