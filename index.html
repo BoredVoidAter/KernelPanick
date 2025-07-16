@@ -18,11 +18,26 @@
         async function main() {
             let pyodide = await loadPyodide();
             document.getElementById("output").innerText = "Pyodide loaded. Running Python script...";
+
+            // Redirect stdout and stderr to the output div
+            pyodide.setStdout({
+                write: (msg) => {
+                    document.getElementById("output").innerText += msg;
+                }
+            });
+            pyodide.setStderr({
+                write: (msg) => {
+                    document.getElementById("output").innerText += msg;
+                }
+            });
+
             try {
-                const pythonCode = await pyodide.FS.readFile("/web_src/main.py", { encoding: "utf8" });
-                await pyodide.runPython(pythonCode);
+                await pyodide.runPython(`print("Hello from Pyodide!")`);
             } catch (err) {
-                document.getElementById("output").innerText += `\nError: ${err}`;
+                document.getElementById("output").innerText += `\nError: ${err.name}: ${err.message}`;
+                if (err.stack) {
+                    document.getElementById("output").innerText += `\nStack: ${err.stack}`;
+                }
             }
         }
         main();
