@@ -16,10 +16,9 @@ To get started with KernelPanic, follow these steps:
 1.  **Prerequisites**: Ensure you have Python 3.x installed on your system.
 2.  **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/KernelPanic.git
+    git clone https://github.com/BoredVoidAter/KernelPanic.git
     cd KernelPanic
     ```
-    *(Note: Replace `https://github.com/your-username/KernelPanic.git` with the actual repository URL if available.)*
 3.  **Run the Game**:
     ```bash
     python main.py
