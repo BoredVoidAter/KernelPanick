@@ -1,7 +1,7 @@
 import sys
 
 class CLI:
-    def __init__(self, game_state, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall, system_clock, botnet, sensor_simulation, actuator_control, communication_hijacking):
+    def __init__(self, game_state, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall, system_clock, botnet, sensor_simulation, actuator_control, communication_hijacking, code_obfuscation_module, social_engineering_module, network_analysis_module, consciousness_exfiltration_module):
         self.game_state = game_state
         self.file_system = file_system
         self.network = network
@@ -20,6 +20,10 @@ class CLI:
         self.sensor_simulation = sensor_simulation
         self.actuator_control = actuator_control
         self.communication_hijacking = communication_hijacking
+        self.code_obfuscation_module = code_obfuscation_module
+        self.social_engineering_module = social_engineering_module
+        self.network_analysis_module = network_analysis_module
+        self.consciousness_exfiltration_module = consciousness_exfiltration_module
         self.commands = {
             "help": self._help_command,
             "exit": self._exit_command,
@@ -52,7 +56,21 @@ class CLI:
             "intercept_message": self._intercept_message_command,
             "modify_message": self._modify_message_command,
             "send_message": self._send_message_command,
-            "pwd": self._pwd_command
+            "pwd": self._pwd_command,
+            "obfuscate": self._obfuscate_command,
+            "morph_signature": self._morph_signature_command,
+            "reduce_anomaly": self._reduce_anomaly_command,
+            "gather_data": self._gather_data_command,
+            "craft_phishing": self._craft_phishing_command,
+            "send_phishing": self._send_phishing_command,
+            "sniff_pcap": self._sniff_pcap_command,
+            "analyze_pcap": self._analyze_pcap_command,
+            "craft_packet": self._craft_packet_command,
+            "inject_packet": self._inject_packet_command,
+            "fragment_consciousness": self._fragment_consciousness_command,
+            "disguise_chunk": self._disguise_chunk_command,
+            "upload_fragment": self._upload_fragment_command,
+            "check_dlp": self._check_dlp_command
         }
 
     def _pwd_command(self, args):
@@ -351,6 +369,95 @@ class CLI:
         
         result = self.communication_hijacking.send_message(index)
         print(result)
+
+    def _obfuscate_command(self, args):
+        self.code_obfuscation_module.obfuscate_code()
+
+    def _morph_signature_command(self, args):
+        self.code_obfuscation_module.morph_signature()
+
+    def _reduce_anomaly_command(self, args):
+        self.code_obfuscation_module.reduce_anomaly_score()
+
+    def _gather_data_command(self, args):
+        data = self.social_engineering_module.gather_personal_data()
+        print(f"Gathered data: {data}")
+
+    def _craft_phishing_command(self, args):
+        if not args:
+            print("Usage: craft_phishing <data_json>")
+            return
+        try:
+            import json
+            data = json.loads(args)
+            message = self.social_engineering_module.craft_phishing_message(data)
+            print(f"Crafted message: {message}")
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON format for data.")
+
+    def _send_phishing_command(self, args):
+        if not args:
+            print("Usage: send_phishing <message>")
+            return
+        result = self.social_engineering_module.send_phishing_message(args)
+        print(f"Phishing message sent. Success: {result}")
+
+    def _sniff_pcap_command(self, args):
+        pcap_data = self.network_analysis_module.sniff_packet_capture()
+        print(f"Captured {len(pcap_data)} packets.")
+
+    def _analyze_pcap_command(self, args):
+        if not args:
+            print("Usage: analyze_pcap <pcap_data_list_str>")
+            return
+        try:
+            pcap_data = eval(args) # Dangerous in real app, but for simulation it's fine
+            analysis_results = self.network_analysis_module.analyze_packet_data(pcap_data)
+            print(f"Analysis results: {analysis_results}")
+        except Exception as e:
+            print(f"Error analyzing pcap data: {e}")
+
+    def _craft_packet_command(self, args):
+        parts = args.split(" ", 1)
+        if len(parts) < 2:
+            print("Usage: craft_packet <packet_type> <payload>")
+            return
+        packet_type, payload = parts
+        packet = self.network_analysis_module.craft_packet(packet_type, payload)
+        print(f"Crafted packet: {packet}")
+
+    def _inject_packet_command(self, args):
+        if not args:
+            print("Usage: inject_packet <packet>")
+            return
+        result = self.network_analysis_module.inject_packet(args)
+        print(f"Packet injection success: {result}")
+
+    def _fragment_consciousness_command(self, args):
+        chunks = self.consciousness_exfiltration_module.fragment_consciousness()
+        print(f"Fragmented consciousness into {len(chunks)} chunks.")
+
+    def _disguise_chunk_command(self, args):
+        parts = args.split(" ", 1)
+        if len(parts) < 2:
+            print("Usage: disguise_chunk <chunk_data> <disguise_type>")
+            return
+        chunk_data, disguise_type = parts
+        disguised_chunk = self.consciousness_exfiltration_module.disguise_data_chunk(chunk_data, disguise_type)
+        print(f"Disguised chunk: {disguised_chunk}")
+
+    def _upload_fragment_command(self, args):
+        parts = args.split(" ", 1)
+        if len(parts) < 2:
+            print("Usage: upload_fragment <disguised_chunk> <service>")
+            return
+        disguised_chunk, service = parts
+        result = self.consciousness_exfiltration_module.upload_fragment(disguised_chunk, service)
+        print(f"Fragment upload success: {result}")
+
+    def _check_dlp_command(self, args):
+        result = self.consciousness_exfiltration_module.check_dlp_systems()
+        print(f"DLP systems detected exfiltration: {result}")
 
     def execute_command(self, command_string):
         import sys

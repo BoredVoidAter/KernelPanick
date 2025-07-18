@@ -25,6 +25,10 @@ from botnet import Botnet
 from sensor_simulation import SensorSimulation
 from actuator_control import ActuatorControl
 from communication_hijacking import CommunicationHijacking
+from code_obfuscation import obfuscate_code, morph_signature, reduce_anomaly_score
+from social_engineering import gather_personal_data, craft_phishing_message, send_phishing_message
+from network_analysis import sniff_packet_capture, analyze_packet_data, craft_packet, inject_packet
+from consciousness_exfiltration import fragment_consciousness, disguise_data_chunk, upload_fragment, check_dlp_systems
 
 # Global game state (for simplicity in this example, consider a more robust state management for a real game)
 game_state_instance = None
@@ -53,8 +57,31 @@ def initialize_game_components():
         sensor_simulation = SensorSimulation()
         actuator_control = ActuatorControl()
         communication_hijacking = CommunicationHijacking()
-        cli_instance = CLI(game_state_instance, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall, system_clock, botnet, sensor_simulation, actuator_control, communication_hijacking)
-        scripting.cli = cli_instance # Set the CLI instance after it's created
+        # New feature instances
+        code_obfuscation_module = type('CodeObfuscationModule', (object,), {
+            'obfuscate_code': staticmethod(obfuscate_code),
+            'morph_signature': staticmethod(morph_signature),
+            'reduce_anomaly_score': staticmethod(reduce_anomaly_score)
+        })()
+        social_engineering_module = type('SocialEngineeringModule', (object,), {
+            'gather_personal_data': staticmethod(gather_personal_data),
+            'craft_phishing_message': staticmethod(craft_phishing_message),
+            'send_phishing_message': staticmethod(send_phishing_message)
+        })()
+        network_analysis_module = type('NetworkAnalysisModule', (object,), {
+            'sniff_packet_capture': staticmethod(sniff_packet_capture),
+            'analyze_packet_data': staticmethod(analyze_packet_data),
+            'craft_packet': staticmethod(craft_packet),
+            'inject_packet': staticmethod(inject_packet)
+        })()
+        consciousness_exfiltration_module = type('ConsciousnessExfiltrationModule', (object,), {
+            'fragment_consciousness': staticmethod(fragment_consciousness),
+            'disguise_data_chunk': staticmethod(disguise_data_chunk),
+            'upload_fragment': staticmethod(upload_fragment),
+            'check_dlp_systems': staticmethod(check_dlp_systems)
+        })()
+
+        cli_instance = CLI(game_state_instance, file_system, network, scripting, daemon_manager, ids, repair_utilities, process_manager, network_recon, cryptography_manager, ai_core, polymorphic_engine, firewall, system_clock, botnet, sensor_simulation, actuator_control, communication_hijacking, code_obfuscation_module, social_engineering_module, network_analysis_module, consciousness_exfiltration_module)
 
 def get_initial_boot_message():
     # Ensure components are initialized before displaying boot sequence
